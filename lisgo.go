@@ -17,7 +17,7 @@ func evalPrint(code string) string {
 func main() {
 	//fmt.Println("Hello, 世界")
 	td := `
- (quote (1 . 2 . 4 . 5))
+(list "\"123" "1234" "string" 123 (list 1 2 3 "4"))
 `
 
 	parsed := parser.Parse(td)

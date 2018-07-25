@@ -20,6 +20,7 @@ func splitAtom(str string) []string {
 				word = ""
 			}
 		} else if char == '"' && pre != '\\' {
+			word = fmt.Sprintf("%s%c", word, char)
 			inStr = !inStr
 		} else {
 			word = fmt.Sprintf("%s%c", word, char)

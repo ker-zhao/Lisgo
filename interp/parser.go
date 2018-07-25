@@ -1,6 +1,9 @@
 package interp
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+)
 
 func Stringify(atom Atom) string {
 	if atom.IsType(TBoolean) {
@@ -12,7 +15,8 @@ func Stringify(atom Atom) string {
 	} else if atom.IsType(TSymbol) {
 		return string(*(*Symbol)(atom.Data))
 	} else if atom.IsType(TString) {
-		return string(*(*String)(atom.Data))
+		r := strings.Replace(string(*(*String)(atom.Data)), `"`, `\"`, -1)
+		return `"` + r + `"`
 	} else if atom.IsType(TPair) {
 		r := "("
 		i := 0
