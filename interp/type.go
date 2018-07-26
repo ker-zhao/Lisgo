@@ -23,7 +23,6 @@ type Int int
 type Float float64
 type String string
 
-
 func Sym(s string) *Symbol {
 	if v, ok := symbolTable[s]; ok {
 		return v
@@ -76,6 +75,10 @@ func (s Atom) IsType(t ObjTypeKind) bool {
 	return s.ObjType.ObjTypeKind == t
 }
 
+func IsPair(atom Atom) bool {
+	return atom.IsType(TPair) && (atom.Data != nil)
+}
+
 func AtomEqual(x Atom, y Atom) bool {
 	if x.IsType(y.ObjType.ObjTypeKind) {
 		if x.IsType(TPair) {
@@ -85,7 +88,7 @@ func AtomEqual(x Atom, y Atom) bool {
 				}
 			}
 			return true
-		} else if x.IsType(TBoolean){
+		} else if x.IsType(TBoolean) {
 			return *(*Boolean)(x.Data) == *(*Boolean)(y.Data)
 		} else if x.IsType(TInt) {
 			return *(*Int)(x.Data) == *(*Int)(y.Data)
@@ -93,7 +96,7 @@ func AtomEqual(x Atom, y Atom) bool {
 			return *(*Float)(x.Data) == *(*Float)(y.Data)
 		} else if x.IsType(TString) {
 			return *(*String)(x.Data) == *(*String)(y.Data)
-		} else if x.IsType(TSymbol){
+		} else if x.IsType(TSymbol) {
 			return *(*Symbol)(x.Data) == *(*Symbol)(y.Data)
 		} else if x.IsType(TClosure) {
 			return *(*Closure)(x.Data) == *(*Closure)(y.Data)
@@ -140,6 +143,14 @@ func PairToSlice(p Atom) []Atom {
 		l = append(l, pair.Car)
 	}
 	return l
+}
+
+func ListLength(p Atom) int {
+	i := 0
+	for pair := (*Pair)(p.Data); pair != nil; pair = (*Pair)(pair.Cdr.Data) {
+		i += 1
+	}
+	return i
 }
 
 func PairGet(p Atom, n int) Atom {

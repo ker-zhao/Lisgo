@@ -2,11 +2,19 @@ package parser
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
 	"lisgo/interp"
 )
+
+var quotes = map[string]*interp.Symbol{
+	`'`:  interp.Sym("quote"),
+	"`":  interp.Sym("quasiquote"),
+	`,`:  interp.Sym("unquote"),
+	`,@`: interp.Sym("unquote-splicing"),
+}
 
 func splitAtom(str string) []string {
 	l := make([]string, 0)
@@ -34,10 +42,14 @@ func splitAtom(str string) []string {
 }
 
 func tokenize(chars string) []string {
-	chars = strings.Replace(chars, "(", " ( ", -1)
-	chars = strings.Replace(chars, ")", " ) ", -1)
+	keyChars := []string{"(", ")", "'", "`", ",@"}
+	for _, v := range keyChars {
+		chars = strings.Replace(chars, v, " "+v+" ", -1)
+	}
 	chars = strings.Replace(chars, "[", " ( ", -1)
 	chars = strings.Replace(chars, "]", " ) ", -1)
+	unquote, _ := regexp.Compile(",([^@])")
+	chars = unquote.ReplaceAllString(chars, " , $1")
 	return splitAtom(chars)
 }
 
@@ -52,6 +64,9 @@ func readFromTokens(tokens []string, index *int) interp.Atom {
 		}
 		*index += 1
 		return *l.First
+	} else if v, ok := quotes[token]; ok {
+		l := interp.NewLinkedList(interp.NewAtom(interp.TypeSymbol, v), readFromTokens(tokens, index))
+		return l.ToPair()
 	} else {
 		return atom(token)
 	}
@@ -77,10 +92,13 @@ func atom(str string) interp.Atom {
 
 func Parse(program string) interp.Atom {
 	var index int
-	return readFromTokens(tokenize(program), &index)
+	return interp.Expand(readFromTokens(tokenize(program), &index))
 }
 
-
+func ParseUnexpand(program string) interp.Atom {
+	var index int
+	return readFromTokens(tokenize(program), &index)
+}
 
 func checkError(err error, info string) {
 	if err != nil {

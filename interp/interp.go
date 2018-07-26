@@ -1,5 +1,48 @@
 package interp
 
+func require(exp Atom, cond bool, msg string) {
+	if !cond {
+		panic(Stringify(exp) + ": " + msg)
+	}
+}
+
+func Expand(exp Atom) Atom {
+	//sym := (*Symbol)((*(*Pair)(exp.Data)).Car.Data)
+	//exps := (*(*Pair)(exp.Data)).Cdr
+	if !IsPair(exp) {
+		return exp
+	} else if (*Symbol)(PairGet(exp, 0).Data) == Sym("quasiquote") {
+		return expandQuote(PairGet(exp, 1))
+	} else {
+		l := NewLinkedList()
+		Foreach(exp, func(_ int, atom Atom) {
+			l.Insert(Expand(atom))
+		})
+		return l.ToPair()
+	}
+}
+
+func expandQuote(exp Atom) Atom {
+	if !IsPair(exp) {
+		l := NewLinkedList(NewAtom(TypeSymbol, Sym("quote")), exp)
+		return l.ToPair()
+	} else {
+		sym := PairGet(exp, 0)
+		if IsPair(sym) && (*Symbol)(PairGet(sym, 0).Data) == Sym("unquote-splicing") {
+			require(sym, ListLength(sym) == 2, "wrong length")
+			arg := PairGet(PairGet(exp, 0), 1)
+			l := NewLinkedList(NewAtom(TypeSymbol, Sym("append")), arg, expandQuote(Cdr(exp)))
+			return l.ToPair()
+		} else if (*Symbol)(sym.Data) == Sym("unquote") {
+			require(exp, ListLength(exp) == 2, "wrong length")
+			return PairGet(exp, 1)
+		} else {
+			l := NewLinkedList(NewAtom(TypeSymbol, Sym("cons")), expandQuote(sym), expandQuote(Cdr(exp)))
+			return l.ToPair()
+		}
+	}
+}
+
 func InterP(exp Atom, env *Env) Atom {
 	if exp.IsType(TSymbol) {
 		x := (*Symbol)(exp.Data)

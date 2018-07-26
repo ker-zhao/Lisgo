@@ -71,3 +71,15 @@ func Test_InterP3(t *testing.T) {
 		t.Errorf("Error: Test_InterP3 \n")
 	}
 }
+
+func Test_InterP4(t *testing.T) {
+	code1 := "(begin (define x '(1 2)) (define y 3)  `(,@x ,y 4))"
+	code2 := "'(1 2 3 4)"
+	r1 := interp.InterP(parser.Parse(code1), interp.GlobalEnv)
+	r2 := interp.InterP(parser.Parse(code2), interp.GlobalEnv)
+	if interp.AtomEqual(r1, r2) {
+		t.Log("OK")
+	} else {
+		t.Errorf("Error: Test_InterP4 \n")
+	}
+}

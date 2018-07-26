@@ -1,8 +1,10 @@
 package interp
 
+import "fmt"
+
 type BuildInProcedure struct {
-	Opt *Symbol
-	_   *Symbol
+	Opt        *Symbol
+	_          *Symbol
 	handleFunc func(...Atom) Atom
 }
 
@@ -35,17 +37,17 @@ func Cdr(args ...Atom) Atom {
 
 func Append(args ...Atom) Atom {
 	l := NewLinkedList()
-	for _, v := range args[:len(args) - 1] {
+	for _, v := range args[:len(args)-1] {
 		if v.IsType(TPair) {
 			Foreach(v, func(i int, atom Atom) {
 				l.Insert(atom)
 			})
 		} else {
-			//fmt.Errorf("expected: list? given: %s\n", parser.Stringify(v))
+			fmt.Errorf("expected: list? given: %s\n", Stringify(v))
 		}
 	}
 	pair := (*Pair)(l.Last.Data)
-	(*pair).Cdr = args[len(args) - 1]
+	(*pair).Cdr = args[len(args)-1]
 	return l.ToPair()
 }
 
@@ -69,11 +71,10 @@ func Equal(args ...Atom) Atom {
 }
 
 func Length(args ...Atom) Atom {
-	return NewAtom(TypeInt, len(PairToSlice(args[0])))
+	return NewAtom(TypeInt, ListLength(args[0]))
 }
 
-
-func BasicOptMaker(opt *Symbol) func(...Atom) Atom{
+func BasicOptMaker(opt *Symbol) func(...Atom) Atom {
 	return func(atom ...Atom) Atom {
 		return BasicOpt(opt, atom...)
 	}
@@ -160,7 +161,7 @@ func BasicOpt(opt *Symbol, args ...Atom) Atom {
 			r := !(*(*Boolean)(args[0].Data))
 			result = NewAtom(TypeBoolean, r)
 		}
-		
+
 		if len(args) <= 2 {
 			return result
 		} else {
@@ -169,9 +170,6 @@ func BasicOpt(opt *Symbol, args ...Atom) Atom {
 		}
 	}
 }
-
-
-
 
 func StandardEnv(env *Env) *Env {
 	opts := []string{"+", "-", "*", "/", ">", "<", ">=", "<=", "="}
@@ -189,4 +187,3 @@ func StandardEnv(env *Env) *Env {
 
 	return env
 }
-

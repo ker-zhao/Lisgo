@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"lisgo/interp"
 	"lisgo/parser"
+	"lisgo/repl"
 )
 
 func eval(code string) interp.Atom {
@@ -15,17 +16,21 @@ func evalPrint(code string) string {
 }
 
 func main() {
-	//fmt.Println("Hello, 世界")
-	td := `
-(list "\"123" "1234" "string" 123 (list 1 2 3 "4"))
-`
+	//测试代码 `(,@x 3 4 ,`x)可以测试多重的quasiquote
 
-	parsed := parser.Parse(td)
-	parsedS := interp.Stringify(parsed)
+	td := "(begin (define x '(1 2)) (define y 3)  `(,@x ,y 4))"
+
+	parsed := parser.ParseUnexpand(td)
+
+	parsedRaw := interp.Stringify(parsed)
+	fmt.Println(parsedRaw)
+
+	parsedS := interp.Stringify(interp.Expand(parsed))
 	fmt.Println(parsedS)
 
 	r := evalPrint(td)
 	fmt.Println("----------------------")
 	fmt.Println(r)
 
+	repl.REPL()
 }
