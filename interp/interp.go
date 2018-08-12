@@ -97,9 +97,11 @@ func InterP(exp Atom, env *Env) Atom {
 			if values[0].IsType(TClosure) {
 				function := (*Closure)(values[0].Data)
 				return function.call(values[1:]...)
-			} else {
+			} else if values[0].IsType(TBuildIn) {
 				function := (*BuildInProcedure)(values[0].Data)
 				return function.call(values[1:]...)
+			} else {
+				panic("application: not a procedure. >>> " + Stringify(PairGet(exp, 0)))
 			}
 		}
 	}
