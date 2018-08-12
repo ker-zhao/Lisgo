@@ -65,11 +65,11 @@ func InterP(exp Atom, env *Env) Atom {
 		} else if sym == Sym("set!") {
 			ref, args := (*Symbol)(PairGet(exps, 0).Data), PairGet(exps, 1)
 			env.find(ref)[ref] = InterP(args, env)
-			return EmptyPair
+			return Void
 		} else if sym == Sym("define") {
 			ref, args := (*Symbol)(PairGet(exps, 0).Data), PairGet(exps, 1)
 			env.ext(ref, InterP(args, env))
-			return EmptyPair
+			return Void
 		} else if sym == Sym("lambda") {
 			params, args := PairGet(exps, 0), PairGet(exps, 1)
 			return NewAtom(TypeClosure, NewClosure(params, args, env))
