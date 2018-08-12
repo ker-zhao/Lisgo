@@ -192,6 +192,15 @@ func (s *LinkedList) ToPair() Atom {
 	return *s.First
 }
 
+func IsList(atom Atom) bool {
+	for pair := (*Pair)(atom.Data); pair != nil; pair = (*Pair)(pair.Cdr.Data) {
+		if !pair.Cdr.IsType(TPair) {
+			return false
+		}
+	}
+	return true
+}
+
 type Env struct {
 	vars  map[*Symbol]Atom
 	outer *Env

@@ -74,6 +74,14 @@ func Length(args ...Atom) Atom {
 	return NewAtom(TypeInt, ListLength(args[0]))
 }
 
+func IsListBuildIn(args ...Atom) Atom {
+	return NewAtom(TypeBoolean, IsList(args[0]))
+}
+
+func IsPairBuildIn(args ...Atom) Atom {
+	return NewAtom(TypeBoolean, IsPair(args[0]))
+}
+
 func BasicOptMaker(opt *Symbol) func(...Atom) Atom {
 	return func(atom ...Atom) Atom {
 		return BasicOpt(opt, atom...)
@@ -184,6 +192,8 @@ func StandardEnv(env *Env) *Env {
 	env.extBuildIn("eq?", Eq)
 	env.extBuildIn("equal?", Equal)
 	env.extBuildIn("length", Length)
+	env.extBuildIn("list?", IsListBuildIn)
+	env.extBuildIn("pair?", IsPairBuildIn)
 
 	return env
 }
