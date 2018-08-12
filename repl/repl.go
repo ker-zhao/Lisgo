@@ -3,9 +3,9 @@ package repl
 import (
 	"bufio"
 	"fmt"
-	"lisgo/interp"
-	"lisgo/parser"
 	"os"
+
+	"lisgo/interp"
 )
 
 func REPL() {
@@ -23,10 +23,12 @@ func repl() {
 	for {
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print("> ")
-		text, err := reader.ReadString('\n')
-		checkError(err, "Read input error: %s \n")
-		//fmt.Println(text)
-		val := interp.InterP(parser.Parse(text), interp.GlobalEnv)
+		input := newInput(reader)
+		//text, err := reader.ReadString('\n')
+		//bytes, _, err := reader.ReadLine()
+		//text := string(bytes)
+		//checkError(err, "Read input error: %s \n")
+		val := interp.InterP(input.GetExp(), interp.GlobalEnv)
 		if !val.IsType(interp.TVoid) {
 			fmt.Println(interp.Stringify(val))
 		}
