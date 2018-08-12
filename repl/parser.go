@@ -5,6 +5,8 @@ import (
 	"regexp"
 
 	"lisgo/interp"
+	"fmt"
+	"io"
 )
 
 var quotes = map[string]*interp.Symbol{
@@ -51,58 +53,70 @@ func newInput(reader reader) *Input {
 	return &Input{reader, make([]byte, 0), regexp.MustCompile(tokenizer)}
 }
 
-func (s *Input) GetToken() (token string, eof bool) {
+func (s *Input) GetToken(depth int) (token string, eof bool) {
 	for {
-		s.read()
 		if len(s.line) == 0 {
-			return "", true
-		} else {
-			groups := s.reg.FindSubmatch(s.line)
-			tokenBytes := groups[1]
-			s.line = groups[2]
-			if len(tokenBytes) > 0 && tokenBytes[0] != ';' {
-				return string(tokenBytes), false
+			if depth > 0 {
+				for i := 0; i <= depth; i++ {
+					fmt.Print("  ")
+				}
 			}
+			var err error
+			s.line, _, err = s.reader.ReadLine()
+			if err == io.EOF {
+				return "", true
+			} else if err != nil {
+				fmt.Errorf("error: s.reader.ReadLine failed. %s", err)
+			}
+		}
+		groups := s.reg.FindSubmatch(s.line)
+		tokenBytes := groups[1]
+		s.line = groups[2]
+		if len(tokenBytes) > 0 && tokenBytes[0] != ';' {
+			//if _, ok := quotes[string(tokenBytes)]; ok {
+			//	s, eof := s.GetToken(prompt)
+			//	return string(tokenBytes) + s, eof
+			//}
+			return string(tokenBytes), false
 		}
 	}
 }
 
-func (s *Input) read() {
-	if len(s.line) == 0 {
-		var err error
-		s.line, _, err = s.reader.ReadLine()
-		checkError(err, "Error: s.reader.ReadLine failed. %s")
+func (s *Input) GetExp(prompt string) (exp interp.Atom, eof bool) {
+	if prompt != "" {
+		fmt.Print(prompt)
 	}
-}
-
-func (s Input) GetExp() interp.Atom {
-	token, eof := s.GetToken()
+	token, eof := s.GetToken(0)
 	if eof {
-		panic("Error: GetExp Unexpected End-Of-File.")
+		return interp.Void, eof
 	} else {
-		return s.parseToken(token)
+		return s.parseToken(token, prompt, 1), false
 	}
 
 }
 
-func (s Input) parseToken(token string) interp.Atom {
+func (s *Input) parseToken(token string, prompt string, depth int) interp.Atom {
 	if token == "(" {
 		l := interp.NewLinkedList()
 		for {
-			token, eof := s.GetToken()
+			token, eof := s.GetToken(depth)
 			if eof {
 				panic("Error: parseToken Unexpected End-Of-File.")
 			}
 			if token == ")" {
 				return l.ToPair()
 			} else {
-				l.Insert(s.parseToken(token))
+				l.Insert(s.parseToken(token, prompt, depth + 1))
 			}
 		}
 	} else if token == ")" {
 		panic("Error: Unexpected ) in here.")
 	} else if v, ok := quotes[token]; ok {
-		l := interp.NewLinkedList(interp.NewAtom(interp.TypeSymbol, v), s.GetExp())
+		atom, eof := s.GetExp("")
+		if eof {
+			panic("read: expected an element for quoting ' (found end-of-file)")
+		}
+		l := interp.NewLinkedList(interp.NewAtom(interp.TypeSymbol, v), atom)
 		return l.ToPair()
 	} else {
 		return atom(token)

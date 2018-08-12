@@ -6,7 +6,10 @@ import (
 	"os"
 
 	"lisgo/interp"
+	"io"
 )
+
+const Prompt = "> "
 
 func REPL() {
 	for {
@@ -20,15 +23,19 @@ func repl() {
 			fmt.Println(err)
 		}
 	}()
+
+	Exec(os.Stdin, Prompt)
+}
+
+func Exec(rd io.Reader, prompt string) {
+	reader := bufio.NewReader(rd)
+	input := newInput(reader)
 	for {
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print("> ")
-		input := newInput(reader)
-		//text, err := reader.ReadString('\n')
-		//bytes, _, err := reader.ReadLine()
-		//text := string(bytes)
-		//checkError(err, "Read input error: %s \n")
-		val := interp.InterP(input.GetExp(), interp.GlobalEnv)
+		atom, eof := input.GetExp(prompt)
+		if eof {
+			return
+		}
+		val := interp.InterP(interp.Expand(atom), interp.GlobalEnv)
 		if !val.IsType(interp.TVoid) {
 			fmt.Println(interp.Stringify(val))
 		}
@@ -37,6 +44,12 @@ func repl() {
 
 func checkError(err error, info string) {
 	if err != nil {
-		fmt.Errorf(info, err.Error())
+		fmt.Printf(info, err.Error() + "\n")
+	}
+}
+
+func checkErrorPanic(err error, info string) {
+	if err != nil {
+		panic(fmt.Sprintf(info, err.Error()))
 	}
 }
