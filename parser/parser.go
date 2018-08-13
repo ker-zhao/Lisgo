@@ -102,6 +102,6 @@ func ParseUnexpand(program string) interp.Atom {
 
 func checkError(err error, info string) {
 	if err != nil {
-		fmt.Printf(info, err.Error() + "\n")
+		fmt.Printf(info, err.Error()+"\n")
 	}
 }

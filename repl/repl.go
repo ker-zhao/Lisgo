@@ -3,10 +3,10 @@ package repl
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 
 	"lisgo/interp"
-	"io"
 )
 
 const Prompt = "> "
@@ -44,7 +44,7 @@ func Exec(rd io.Reader, prompt string) {
 
 func checkError(err error, info string) {
 	if err != nil {
-		fmt.Printf(info, err.Error() + "\n")
+		fmt.Printf(info, err.Error()+"\n")
 	}
 }
 

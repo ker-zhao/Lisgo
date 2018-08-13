@@ -1,12 +1,12 @@
 package repl
 
 import (
-	"strconv"
-	"regexp"
-
-	"lisgo/interp"
 	"fmt"
 	"io"
+	"regexp"
+	"strconv"
+
+	"lisgo/interp"
 )
 
 var quotes = map[string]*interp.Symbol{
@@ -15,7 +15,6 @@ var quotes = map[string]*interp.Symbol{
 	`,`:  interp.Sym("unquote"),
 	`,@`: interp.Sym("unquote-splicing"),
 }
-
 
 func atom(str string) interp.Atom {
 	if str == "#t" {
@@ -35,15 +34,14 @@ func atom(str string) interp.Atom {
 	}
 }
 
-
 type reader interface {
 	ReadLine() (line []byte, isPrefix bool, err error)
 }
 
 type Input struct {
 	reader reader
-	line []byte
-	reg *regexp.Regexp
+	line   []byte
+	reg    *regexp.Regexp
 }
 
 // \s*(,@|[('`,)]|"(?:[\\].|[^\\"])*"|;.*|[^\s('"`,;)]*)(.*)
@@ -106,7 +104,7 @@ func (s *Input) parseToken(token string, prompt string, depth int) interp.Atom {
 			if token == ")" {
 				return l.ToPair()
 			} else {
-				l.Insert(s.parseToken(token, prompt, depth + 1))
+				l.Insert(s.parseToken(token, prompt, depth+1))
 			}
 		}
 	} else if token == ")" {

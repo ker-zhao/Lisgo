@@ -1,6 +1,5 @@
 package interp
 
-
 // Keyword
 const KeyIf = "if"
 const KeyQuote = "quote"
@@ -11,7 +10,6 @@ const KeySet = "set!"
 const KeyDefine = "define"
 const KeyLambda = "lambda"
 const KeyBegin = "begin"
-
 
 // Messages
 const MsgWrongLength = "syntax error: wrong length"

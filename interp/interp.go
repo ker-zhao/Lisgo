@@ -8,8 +8,6 @@ func require(exp Atom, cond bool, msg string) {
 
 func Expand(x Atom) Atom {
 	sym := (*Symbol)(PairGet(x, 0).Data)
-	//exps := (*(*Pair)(x.Data)).Cdr
-
 	require(x, !IsPair(x) || ListLength(x) != 0, MsgWrongLength)
 	if !IsPair(x) {
 		return x
@@ -37,7 +35,7 @@ func Expand(x Atom) Atom {
 			return List(def, v, exp)
 		}
 	} else if sym == Sym(KeyBegin) {
-		if ListLength(x) == 1{
+		if ListLength(x) == 1 {
 			return Void
 		} else {
 			return Map(Expand, x)

@@ -149,7 +149,6 @@ func Map(f func(x Atom) Atom, p Atom) Atom {
 	return l.ToPair()
 }
 
-
 func PairToSlice(p Atom) []Atom {
 	l := make([]Atom, 0)
 	for pair := (*Pair)(p.Data); pair != nil; pair = (*Pair)(pair.Cdr.Data) {
