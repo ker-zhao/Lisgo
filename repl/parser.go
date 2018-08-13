@@ -16,7 +16,6 @@ var quotes = map[string]*interp.Symbol{
 	`,@`: interp.Sym(interp.KeyUnquoteSplicing),
 }
 
-
 func atom(str string) interp.Atom {
 	if str == "#t" {
 		return interp.NewAtom(interp.TypeBoolean, interp.Boolean(true))

@@ -97,9 +97,8 @@ func AtomEqual(x Atom, y Atom) bool {
 				}
 				return true
 			} else if IsList(x) == IsList(y) {
-				for i, pair, pairY := 0, (*Pair)(x.Data), (*Pair)(y.Data);
-				pair != nil; i, pair, pairY = i+1, (*Pair)(pair.Cdr.Data), (*Pair)(pairY.Cdr.Data) {
-					if !AtomEqual(pair.Car, pairY.Car) || !AtomEqual(pair.Cdr, pairY.Cdr){
+				for i, pair, pairY := 0, (*Pair)(x.Data), (*Pair)(y.Data); pair != nil; i, pair, pairY = i+1, (*Pair)(pair.Cdr.Data), (*Pair)(pairY.Cdr.Data) {
+					if !AtomEqual(pair.Car, pairY.Car) || !AtomEqual(pair.Cdr, pairY.Cdr) {
 						return false
 					}
 					if !pair.Cdr.IsType(TPair) {
@@ -244,7 +243,7 @@ func NewEnv(params Atom, args Atom, outer *Env) *Env {
 		make(map[*Symbol]Atom),
 		outer,
 	}
-	require(params, ListLength(params) == ListLength(args), MsgWrongLength +
+	require(params, ListLength(params) == ListLength(args), MsgWrongLength+
 		fmt.Sprintf(" expect %d, giving %d, got: %s",
 			ListLength(params), ListLength(args), Stringify(args)))
 	e.zipUpdate(params, args)
