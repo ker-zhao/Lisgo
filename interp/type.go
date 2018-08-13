@@ -86,7 +86,9 @@ func IsPair(atom Atom) bool {
 func AtomEqual(x Atom, y Atom) bool {
 	if x.IsType(y.ObjType.ObjTypeKind) {
 		if x.IsType(TPair) {
-			if IsList(x) && IsList(y) {
+			isListX := IsList(x)
+			isListY := IsList(y)
+			if isListX && isListY {
 				if ListLength(x) != ListLength(y) {
 					return false
 				}
@@ -96,7 +98,7 @@ func AtomEqual(x Atom, y Atom) bool {
 					}
 				}
 				return true
-			} else if IsList(x) == IsList(y) {
+			} else if isListX == isListY {
 				for i, pair, pairY := 0, (*Pair)(x.Data), (*Pair)(y.Data); pair != nil; i, pair, pairY = i+1, (*Pair)(pair.Cdr.Data), (*Pair)(pairY.Cdr.Data) {
 					if !AtomEqual(pair.Car, pairY.Car) || !AtomEqual(pair.Cdr, pairY.Cdr) {
 						return false
