@@ -53,10 +53,10 @@ func newInput(reader reader) *Input {
 	return &Input{reader, make([]byte, 0), regexp.MustCompile(tokenizer)}
 }
 
-func (s *Input) GetToken(depth int) (token string, eof bool) {
+func (s *Input) GetToken(depth int, prompt string) (token string, eof bool) {
 	for {
 		if len(s.line) == 0 {
-			if depth > 0 {
+			if depth > 0 && prompt != "" {
 				for i := 0; i <= depth; i++ {
 					fmt.Print("  ")
 				}
@@ -82,11 +82,11 @@ func (s *Input) GetToken(depth int) (token string, eof bool) {
 	}
 }
 
-func (s *Input) GetExp(prompt string) (exp interp.Atom, eof bool) {
+func (s *Input) Parse(prompt string) (exp interp.Atom, eof bool) {
 	if prompt != "" {
 		fmt.Print(prompt)
 	}
-	token, eof := s.GetToken(0)
+	token, eof := s.GetToken(0, prompt)
 	if eof {
 		return interp.Void, eof
 	} else {
@@ -99,7 +99,7 @@ func (s *Input) parseToken(token string, prompt string, depth int) interp.Atom {
 	if token == "(" {
 		l := interp.NewLinkedList()
 		for {
-			token, eof := s.GetToken(depth)
+			token, eof := s.GetToken(depth, prompt)
 			if eof {
 				panic("Error: parseToken Unexpected End-Of-File.")
 			}
@@ -112,7 +112,7 @@ func (s *Input) parseToken(token string, prompt string, depth int) interp.Atom {
 	} else if token == ")" {
 		panic("Error: Unexpected ) in here.")
 	} else if v, ok := quotes[token]; ok {
-		atom, eof := s.GetExp("")
+		atom, eof := s.Parse("")
 		if eof {
 			panic("read: expected an element for quoting ' (found end-of-file)")
 		}
@@ -122,6 +122,21 @@ func (s *Input) parseToken(token string, prompt string, depth int) interp.Atom {
 		return atom(token)
 	}
 }
+
+//func Parse(rd io.Reader, prompt string) {
+//	reader := bufio.NewReader(rd)
+//	input := newInput(reader)
+//	for {
+//		atom, eof := input.Parse(prompt)
+//		if eof {
+//			return
+//		}
+//		val := interp.InterP(interp.Expand(atom), interp.GlobalEnv)
+//		if !val.IsType(interp.TVoid) {
+//			fmt.Println(interp.Stringify(val))
+//		}
+//	}
+//}
 
 //func Parse(program string) interp.Atom {
 //	var index int

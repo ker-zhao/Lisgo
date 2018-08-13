@@ -6,19 +6,65 @@ func require(exp Atom, cond bool, msg string) {
 	}
 }
 
-func Expand(exp Atom) Atom {
-	//sym := (*Symbol)((*(*Pair)(exp.Data)).Car.Data)
-	//exps := (*(*Pair)(exp.Data)).Cdr
-	if !IsPair(exp) {
-		return exp
-	} else if (*Symbol)(PairGet(exp, 0).Data) == Sym("quasiquote") {
-		return expandQuote(PairGet(exp, 1))
+func Expand(x Atom) Atom {
+	sym := (*Symbol)(PairGet(x, 0).Data)
+	//exps := (*(*Pair)(x.Data)).Cdr
+
+	require(x, !IsPair(x) || ListLength(x) != 0, MsgWrongLength)
+	if !IsPair(x) {
+		return x
+	} else if sym == Sym(KeyQuote) {
+		require(x, ListLength(x) == 2, MsgWrongLength)
+		return x
+	} else if sym == Sym(KeyIf) {
+		require(x, ListLength(x) == 4, MsgWrongLength)
+		return Map(Expand, x)
+	} else if sym == Sym(KeySet) {
+		require(x, ListLength(x) == 3, MsgWrongLength)
+		v := PairGet(x, 1)
+		require(x, v.IsType(TSymbol), "set! argument must be a symbol")
+		return List(NewSymbol(KeySet), v, Expand(PairGet(x, 2)))
+	} else if sym == Sym(KeyDefine) {
+		require(x, ListLength(x) >= 3, MsgWrongLength)
+		def, v, body := PairGet(x, 0), PairGet(x, 1), Cdr(Cdr(x))
+		if IsList(v) && ListLength(v) != 0 {
+			funcName, args := PairGet(v, 0), Cdr(v)
+			return Expand(List(def, funcName, Append(List(NewSymbol(KeyLambda), args), body)))
+		} else {
+			require(x, ListLength(x) == 3, MsgWrongLength)
+			require(x, v.IsType(TSymbol), "define argument must be a symbol")
+			exp := PairGet(x, 2)
+			return List(def, v, exp)
+		}
+	} else if sym == Sym(KeyBegin) {
+		if ListLength(x) == 1{
+			return Void
+		} else {
+			return Map(Expand, x)
+		}
+	} else if sym == Sym(KeyLambda) {
+		require(x, ListLength(x) >= 3, MsgWrongLength)
+		vars, body := PairGet(x, 1), Cdr(Cdr(x))
+		if IsList(vars) {
+			allSymbol := true
+			Foreach(vars, func(_ int, atom Atom) {
+				allSymbol = allSymbol && atom.IsType(TSymbol)
+			})
+			require(x, allSymbol, "lambda arguments list must be symbols")
+		} else {
+			require(x, vars.IsType(TSymbol), "lambda argument must be a symbol")
+		}
+		var exp Atom
+		if ListLength(body) == 1 {
+			exp = PairGet(body, 0)
+		} else {
+			exp = Cons(NewSymbol(KeyBegin), body)
+		}
+		return List(NewSymbol(KeyLambda), vars, Expand(exp))
+	} else if (*Symbol)(PairGet(x, 0).Data) == Sym("quasiquote") {
+		return expandQuote(PairGet(x, 1))
 	} else {
-		l := NewLinkedList()
-		Foreach(exp, func(_ int, atom Atom) {
-			l.Insert(Expand(atom))
-		})
-		return l.ToPair()
+		return Map(Expand, x)
 	}
 }
 
@@ -48,7 +94,7 @@ func InterP(exp Atom, env *Env) Atom {
 		x := (*Symbol)(exp.Data)
 		v := env.find(x)[x]
 		return v
-	} else if !exp.IsType(TPair) { // int float bool string
+	} else if !exp.IsType(TPair) { // int float bool string void
 		return exp
 	} else {
 		sym := (*Symbol)((*(*Pair)(exp.Data)).Car.Data)

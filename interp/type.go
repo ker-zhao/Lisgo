@@ -34,6 +34,10 @@ func Sym(s string) *Symbol {
 	}
 }
 
+func NewSymbol(s string) Atom {
+	return NewAtom(TypeSymbol, Sym(s))
+}
+
 type ObjType struct {
 	ObjTypeKind
 }
@@ -137,6 +141,15 @@ func Foreach(p Atom, f func(int, Atom)) {
 	}
 }
 
+func Map(f func(x Atom) Atom, p Atom) Atom {
+	l := NewLinkedList()
+	for i, pair := 0, (*Pair)(p.Data); pair != nil; i, pair = i+1, (*Pair)(pair.Cdr.Data) {
+		l.Insert(f(pair.Car))
+	}
+	return l.ToPair()
+}
+
+
 func PairToSlice(p Atom) []Atom {
 	l := make([]Atom, 0)
 	for pair := (*Pair)(p.Data); pair != nil; pair = (*Pair)(pair.Cdr.Data) {
@@ -193,6 +206,9 @@ func (s *LinkedList) ToPair() Atom {
 }
 
 func IsList(atom Atom) bool {
+	if !atom.IsType(TPair) {
+		return false
+	}
 	for pair := (*Pair)(atom.Data); pair != nil; pair = (*Pair)(pair.Cdr.Data) {
 		if !pair.Cdr.IsType(TPair) {
 			return false

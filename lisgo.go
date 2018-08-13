@@ -3,6 +3,7 @@ package main
 import (
 	"lisgo/repl"
 	"os"
+
 )
 
 //func eval(code string) interp.Atom {
@@ -29,8 +30,8 @@ func main() {
 	//r := evalPrint(td)
 	//fmt.Println("----------------------")
 	//fmt.Println(r)
+	//
 
-	//repl.REPL()
 
 	if len(os.Args) > 1 {
 		fileName := os.Args[1]

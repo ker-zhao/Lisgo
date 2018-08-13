@@ -31,7 +31,7 @@ func Exec(rd io.Reader, prompt string) {
 	reader := bufio.NewReader(rd)
 	input := newInput(reader)
 	for {
-		atom, eof := input.GetExp(prompt)
+		atom, eof := input.Parse(prompt)
 		if eof {
 			return
 		}
