@@ -10,10 +10,10 @@ import (
 )
 
 var quotes = map[string]*interp.Symbol{
-	`'`:  interp.Sym("quote"),
-	"`":  interp.Sym("quasiquote"),
-	`,`:  interp.Sym("unquote"),
-	`,@`: interp.Sym("unquote-splicing"),
+	`'`:  interp.Sym(interp.KeyQuote),
+	"`":  interp.Sym(interp.KeyQuasiQuote),
+	`,`:  interp.Sym(interp.KeyUnquote),
+	`,@`: interp.Sym(interp.KeyUnquoteSplicing),
 }
 
 func splitAtom(str string) []string {

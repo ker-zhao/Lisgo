@@ -86,12 +86,30 @@ func IsPair(atom Atom) bool {
 func AtomEqual(x Atom, y Atom) bool {
 	if x.IsType(y.ObjType.ObjTypeKind) {
 		if x.IsType(TPair) {
-			for i, pair := 0, (*Pair)(x.Data); pair != nil; i, pair = i+1, (*Pair)(pair.Cdr.Data) {
-				if !AtomEqual(pair.Car, PairGet(y, i)) {
+			if IsList(x) && IsList(y) {
+				if ListLength(x) != ListLength(y) {
 					return false
 				}
+				for i, pair := 0, (*Pair)(x.Data); pair != nil; i, pair = i+1, (*Pair)(pair.Cdr.Data) {
+					if !AtomEqual(pair.Car, PairGet(y, i)) {
+						return false
+					}
+				}
+				return true
+			} else if IsList(x) == IsList(y) {
+				for i, pair, pairY := 0, (*Pair)(x.Data), (*Pair)(y.Data);
+				pair != nil; i, pair, pairY = i+1, (*Pair)(pair.Cdr.Data), (*Pair)(pairY.Cdr.Data) {
+					if !AtomEqual(pair.Car, pairY.Car) || !AtomEqual(pair.Cdr, pairY.Cdr){
+						return false
+					}
+					if !pair.Cdr.IsType(TPair) {
+						return true
+					}
+				}
+				return true
+			} else {
+				return false
 			}
-			return true
 		} else if x.IsType(TBoolean) {
 			return *(*Boolean)(x.Data) == *(*Boolean)(y.Data)
 		} else if x.IsType(TInt) {
@@ -226,6 +244,9 @@ func NewEnv(params Atom, args Atom, outer *Env) *Env {
 		make(map[*Symbol]Atom),
 		outer,
 	}
+	require(params, ListLength(params) == ListLength(args), MsgWrongLength +
+		fmt.Sprintf(" expect %d, giving %d, got: %s",
+			ListLength(params), ListLength(args), Stringify(args)))
 	e.zipUpdate(params, args)
 	return &e
 }
