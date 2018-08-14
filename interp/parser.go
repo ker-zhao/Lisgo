@@ -3,6 +3,7 @@ package interp
 import (
 	"strconv"
 	"strings"
+	"fmt"
 )
 
 func Stringify(atom Atom) string {
@@ -38,7 +39,10 @@ func Stringify(atom Atom) string {
 		f := float64(*(*Float)(atom.Data))
 		r := strconv.FormatFloat(f, 'E', -1, 64)
 		return r
-	} else { // Procedure or build-in
-		return "#<procedure>"
+	} else if atom.IsType(TClosure) || atom.IsType(TBuildIn) {
+		tmp := string(*atom.ObjInfo.Name)
+		return fmt.Sprintf("#<procedure:%s>", tmp)
+	} else { // Void, maybe never should be see this?
+		return "#<void>"
 	}
 }

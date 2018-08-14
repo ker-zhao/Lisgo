@@ -38,12 +38,16 @@ func NewSymbol(s string) Atom {
 	return NewAtom(TypeSymbol, Sym(s))
 }
 
-type ObjType struct {
-	ObjTypeKind
+type ObjInfo struct {
+	TypeKind ObjTypeKind
+	Name     *Symbol
 }
 
-func NewObjType(t ObjTypeKind) *ObjType {
-	return &ObjType{t}
+func NewObjInfo(t ObjTypeKind) *ObjInfo {
+	return &ObjInfo{t, nil}
+}
+func NewObjInfoAll(t ObjTypeKind, n *Symbol) *ObjInfo {
+	return &ObjInfo{t, n}
 }
 
 type EmptyInterface struct {
@@ -52,12 +56,12 @@ type EmptyInterface struct {
 }
 
 type Atom struct {
-	ObjType *ObjType
+	ObjInfo *ObjInfo
 	Data    unsafe.Pointer
 	I       interface{}
 }
 
-func NewAtom(objT *ObjType, data interface{}) Atom {
+func NewAtom(objT *ObjInfo, data interface{}) Atom {
 	empty := *((*EmptyInterface)(unsafe.Pointer(&data)))
 	return Atom{
 		objT,
@@ -66,7 +70,7 @@ func NewAtom(objT *ObjType, data interface{}) Atom {
 	}
 }
 
-func NewAtomPtr(objT *ObjType, data interface{}) *Atom {
+func NewAtomPtr(objT *ObjInfo, data interface{}) *Atom {
 	empty := *((*EmptyInterface)(unsafe.Pointer(&data)))
 	return &Atom{
 		objT,
@@ -76,7 +80,7 @@ func NewAtomPtr(objT *ObjType, data interface{}) *Atom {
 }
 
 func (s Atom) IsType(t ObjTypeKind) bool {
-	return s.ObjType.ObjTypeKind == t
+	return s.ObjInfo.TypeKind == t
 }
 
 func IsPair(atom Atom) bool {
@@ -84,7 +88,7 @@ func IsPair(atom Atom) bool {
 }
 
 func AtomEqual(x Atom, y Atom) bool {
-	if x.IsType(y.ObjType.ObjTypeKind) {
+	if x.IsType(y.ObjInfo.TypeKind) {
 		if x.IsType(TPair) {
 			isListX := IsList(x)
 			isListY := IsList(y)
@@ -255,6 +259,7 @@ func NewEnv(params Atom, args Atom, outer *Env) *Env {
 }
 
 func (s *Env) ext(x *Symbol, v Atom) *Env {
+	v.ObjInfo = NewObjInfoAll(v.ObjInfo.TypeKind, x)
 	s.vars[x] = v
 	return s
 }
@@ -266,11 +271,11 @@ func (s *Env) extBuildIn(x string, handler func(...Atom) Atom) *Env {
 
 func (s *Env) zipUpdate(params Atom, args Atom) *Env {
 	if params.IsType(TSymbol) {
-		s.vars[(*Symbol)(params.Data)] = args
+		s.ext((*Symbol)(params.Data), args)
 	} else {
 		p, a := PairToSlice(params), PairToSlice(args)
 		for i, v := range p {
-			s.vars[(*Symbol)(v.Data)] = a[i]
+			s.ext((*Symbol)(v.Data), a[i])
 		}
 	}
 	return s

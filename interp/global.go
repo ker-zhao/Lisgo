@@ -1,15 +1,15 @@
 package interp
 
 // const
-var TypeSymbol = NewObjType(TSymbol)
-var TypeInt = NewObjType(TInt)
-var TypeFloat = NewObjType(TFloat)
-var TypeBoolean = NewObjType(TBoolean)
-var TypeString = NewObjType(TString)
-var TypeClosure = NewObjType(TClosure)
-var TypeBuildIn = NewObjType(TBuildIn)
-var TypePair = NewObjType(TPair)
-var TypeVoid = NewObjType(TVoid)
+var TypeSymbol = NewObjInfo(TSymbol)
+var TypeInt = NewObjInfo(TInt)
+var TypeFloat = NewObjInfo(TFloat)
+var TypeBoolean = NewObjInfo(TBoolean)
+var TypeString = NewObjInfo(TString)
+var TypeClosure = NewObjInfo(TClosure)
+var TypeBuildIn = NewObjInfo(TBuildIn)
+var TypePair = NewObjInfo(TPair)
+var TypeVoid = NewObjInfo(TVoid)
 
 var EmptyPair = NewAtom(TypePair, nil)
 var Void = NewAtom(TypeVoid, nil)

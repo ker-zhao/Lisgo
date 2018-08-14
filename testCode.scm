@@ -21,13 +21,6 @@
           x)))
   (fact-iter n 1))
 
-(define fact-iter
-  (lambda (n x)
-    (if (> n 1)
-        (fact-iter (- n 1) (* x n))
-        x)))
-
-
 (define fact-iter-let
   (lambda (n x)
     (let ((nn n)
@@ -38,4 +31,4 @@
             x)))))
 
 (add x y)
-(fact-iter-let z 1)
+(fact-tail z)
