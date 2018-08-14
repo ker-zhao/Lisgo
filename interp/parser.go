@@ -6,7 +6,20 @@ import (
 	"fmt"
 )
 
+var quotesReflect = map[*Symbol]string{
+	Sym(KeyQuote): `'`,
+	Sym(KeyQuasiQuote):  "`",
+	Sym(KeyUnquote):  `,`,
+	Sym(KeyUnquoteSplicing): `,@`,
+}
+
 func Stringify(atom Atom) string {
+	if IsList(atom) && ListLength(atom) >= 2 && PairGet(atom, 0).IsType(TSymbol){
+		symbol := (*Symbol)(PairGet(atom, 0).Data)
+		if v, ok := quotesReflect[symbol]; ok {
+			return v + Stringify(PairGet(atom, 1))
+		}
+	}
 	if atom.IsType(TBoolean) {
 		if *(*Boolean)(atom.Data) {
 			return "#t"
@@ -14,7 +27,8 @@ func Stringify(atom Atom) string {
 			return "#f"
 		}
 	} else if atom.IsType(TSymbol) {
-		return string(*(*Symbol)(atom.Data))
+		symbol := (*Symbol)(atom.Data)
+		return string(*symbol)
 	} else if atom.IsType(TString) {
 		r := strings.Replace(string(*(*String)(atom.Data)), `"`, `\"`, -1)
 		return `"` + r + `"`

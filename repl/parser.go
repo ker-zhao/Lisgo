@@ -64,7 +64,7 @@ func (s *Input) GetToken(depth int, prompt string) (token string, eof bool) {
 			if err == io.EOF {
 				return "", true
 			} else if err != nil {
-				fmt.Errorf("error: s.reader.ReadLine failed. %s", err)
+				panic(fmt.Sprintf("error: GetToken s.reader.ReadLine failed. %s", err))
 			}
 		}
 		groups := s.reg.FindSubmatch(s.line)

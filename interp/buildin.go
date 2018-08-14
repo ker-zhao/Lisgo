@@ -43,7 +43,7 @@ func Append(args ...Atom) Atom {
 				l.Insert(atom)
 			})
 		} else {
-			fmt.Errorf("expected: list? given: %s\n", Stringify(v))
+			panic(fmt.Sprintf("expected: list? given: %s\n", Stringify(v)))
 		}
 	}
 	pair := (*Pair)(l.Last.Data)

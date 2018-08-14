@@ -130,8 +130,8 @@ func AtomEqual(x Atom, y Atom) bool {
 		} else if x.IsType(TBuildIn) {
 			return *(*BuildInProcedure)(x.Data).Opt == *(*BuildInProcedure)(y.Data).Opt
 		} else {
-			fmt.Errorf("AtomEqual, input error, unknown type. \n ")
 			fmt.Println(x, y)
+			panic(fmt.Sprintf("AtomEqual, input error, unknown type. \n "))
 			return false
 		}
 	} else {
@@ -251,8 +251,8 @@ func NewEnv(params Atom, args Atom, outer *Env) *Env {
 	}
 	if params.IsType(TPair) {
 		require(params, ListLength(params) == ListLength(args), MsgWrongLength+
-			fmt.Sprintf(" expect %d, giving %d, got: %s",
-				ListLength(params), ListLength(args), Stringify(args)))
+			fmt.Sprintf(" expect %d, giving %d.",
+				ListLength(params), ListLength(args)))
 	}
 	e.zipUpdate(params, args)
 	return &e
