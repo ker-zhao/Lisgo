@@ -245,9 +245,11 @@ func NewEnv(params Atom, args Atom, outer *Env) *Env {
 		make(map[*Symbol]Atom),
 		outer,
 	}
-	require(params, ListLength(params) == ListLength(args), MsgWrongLength+
-		fmt.Sprintf(" expect %d, giving %d, got: %s",
-			ListLength(params), ListLength(args), Stringify(args)))
+	if params.IsType(TPair) {
+		require(params, ListLength(params) == ListLength(args), MsgWrongLength+
+			fmt.Sprintf(" expect %d, giving %d, got: %s",
+				ListLength(params), ListLength(args), Stringify(args)))
+	}
 	e.zipUpdate(params, args)
 	return &e
 }
@@ -263,20 +265,23 @@ func (s *Env) extBuildIn(x string, handler func(...Atom) Atom) *Env {
 }
 
 func (s *Env) zipUpdate(params Atom, args Atom) *Env {
-	p, a := PairToSlice(params), PairToSlice(args)
-	for i, v := range p {
-		s.vars[(*Symbol)(v.Data)] = a[i]
+	if params.IsType(TSymbol) {
+		s.vars[(*Symbol)(params.Data)] = args
+	} else {
+		p, a := PairToSlice(params), PairToSlice(args)
+		for i, v := range p {
+			s.vars[(*Symbol)(v.Data)] = a[i]
+		}
 	}
 	return s
 }
 
-func (s *Env) update(dict map[*Symbol]Atom) *Env {
-
-	for i, v := range dict {
-		s.vars[i] = v
-	}
-	return s
-}
+//func (s *Env) update(dict map[*Symbol]Atom) *Env {
+//	for i, v := range dict {
+//		s.vars[i] = v
+//	}
+//	return s
+//}
 
 func (s *Env) find(x *Symbol) map[*Symbol]Atom {
 	if _, ok := s.vars[x]; ok {

@@ -48,9 +48,9 @@ func Expand(x Atom) Atom {
 			Foreach(vars, func(_ int, atom Atom) {
 				allSymbol = allSymbol && atom.IsType(TSymbol)
 			})
-			require(x, allSymbol, "lambda arguments list must be symbols")
+			require(x, allSymbol, "lambda parameters list must be symbols")
 		} else {
-			require(x, vars.IsType(TSymbol), "lambda argument must be a symbol")
+			require(x, vars.IsType(TSymbol), "lambda parameter must be a symbol")
 		}
 		var exp Atom
 		if ListLength(body) == 1 {
