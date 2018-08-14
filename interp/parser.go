@@ -14,10 +14,14 @@ var quotesReflect = map[*Symbol]string{
 }
 
 func Stringify(atom Atom) string {
+	return StringifyInner(atom, false)
+}
+
+func StringifyInner(atom Atom, inQuote bool) string {
 	if IsList(atom) && ListLength(atom) >= 2 && PairGet(atom, 0).IsType(TSymbol){
 		symbol := (*Symbol)(PairGet(atom, 0).Data)
 		if v, ok := quotesReflect[symbol]; ok {
-			return v + Stringify(PairGet(atom, 1))
+			return v + StringifyInner(PairGet(atom, 1), inQuote)
 		}
 	}
 	if atom.IsType(TBoolean) {
@@ -27,19 +31,26 @@ func Stringify(atom Atom) string {
 			return "#f"
 		}
 	} else if atom.IsType(TSymbol) {
-		symbol := (*Symbol)(atom.Data)
-		return string(*symbol)
+		r := string(*(*Symbol)(atom.Data))
+		if !inQuote {
+			r = "'" + r
+		}
+		return r
 	} else if atom.IsType(TString) {
 		r := strings.Replace(string(*(*String)(atom.Data)), `"`, `\"`, -1)
 		return `"` + r + `"`
 	} else if atom.IsType(TPair) {
 		r := "("
+		if !inQuote {
+			inQuote = true
+			r = "'" + r
+		}
 		i := 0
 		for pair := (*Pair)(atom.Data); pair != nil; i, pair = i+1, (*Pair)(pair.Cdr.Data) {
-			r += Stringify(pair.Car) + " "
+			r += StringifyInner(pair.Car, inQuote) + " "
 			if !pair.Cdr.IsType(TPair) {
 				i += 1
-				r += "." + " " + Stringify(pair.Cdr) + " "
+				r += "." + " " + StringifyInner(pair.Cdr, inQuote) + " "
 				break
 			}
 		}
