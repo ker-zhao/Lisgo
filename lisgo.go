@@ -14,7 +14,7 @@ import (
 //}
 
 func main() {
-	//测试代码 `(,@x 3 4 ,`x)可以测试多重的quasiquote
+	//test codes `(,@x 3 4 ,`x) can test for multiple quasiquote
 
 	//td := "(begin (define x '(1 2)) (define y '(3))  `(,@x ,y 4))"
 	//

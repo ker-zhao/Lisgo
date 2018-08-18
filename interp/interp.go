@@ -93,7 +93,7 @@ func InterP(exp Atom, env *Env) Atom {
 			x := (*Symbol)(exp.Data)
 			v := env.find(x)[x]
 			return v
-		} else if !exp.IsType(TPair) { // int float bool string void
+		} else if !exp.IsType(TPair) { // int float bool string void closure build-in
 			return exp
 		} else {
 			sym := (*Symbol)((*(*Pair)(exp.Data)).Car.Data)

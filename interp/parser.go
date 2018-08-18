@@ -1,15 +1,15 @@
 package interp
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
-	"fmt"
 )
 
 var quotesReflect = map[*Symbol]string{
-	Sym(KeyQuote): `'`,
-	Sym(KeyQuasiQuote):  "`",
-	Sym(KeyUnquote):  `,`,
+	Sym(KeyQuote):           `'`,
+	Sym(KeyQuasiQuote):      "`",
+	Sym(KeyUnquote):         `,`,
 	Sym(KeyUnquoteSplicing): `,@`,
 }
 
@@ -18,7 +18,7 @@ func Stringify(atom Atom) string {
 }
 
 func StringifyInner(atom Atom, inQuote bool) string {
-	if IsList(atom) && ListLength(atom) >= 2 && PairGet(atom, 0).IsType(TSymbol){
+	if IsList(atom) && ListLength(atom) >= 2 && PairGet(atom, 0).IsType(TSymbol) {
 		symbol := (*Symbol)(PairGet(atom, 0).Data)
 		if v, ok := quotesReflect[symbol]; ok {
 			return v + StringifyInner(PairGet(atom, 1), inQuote)
