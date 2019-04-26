@@ -1,2 +1,2 @@
 # lisgo
-A Scheme interpreter written with Go.
+A Scheme Interpreter written with Go.
