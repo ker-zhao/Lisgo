@@ -1,4 +1,4 @@
-# lisgo
+# Lisgo
 A Scheme Interpreter written with Go.
 ## Features
 Tail Recursion / Tail Call
