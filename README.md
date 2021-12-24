@@ -1,5 +1,5 @@
 # Lisgo
-A Scheme Interpreter written with Go.
+A Scheme(Lisp) Interpreter written with Go.
 ## Features
 - Tail Recursion / Tail Call
 - Quotes
